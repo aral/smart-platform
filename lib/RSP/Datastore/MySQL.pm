@@ -111,7 +111,7 @@ sub read_one_object {
         $obj = { id => $id };
       }
       my $val = $row->{propval};            
-      $obj->{ $row->{ propname } } = $val ? $self->encode_output_val( $row->{thingtype}, $val ) : undef;
+      $obj->{ $row->{ propname } } = $val ? $self->encode_output_val( $row->{thingtype}, $val ) : $val;
     }
 
   if (!$obj) {

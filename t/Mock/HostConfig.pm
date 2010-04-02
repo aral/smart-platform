@@ -12,4 +12,7 @@ has use_e4x             => (is => 'rw', isa => 'Bool', default => 1);
 has use_strict          => (is => 'rw', isa => 'Bool', default => 1);
 has alloc_size          => (is => 'rw', isa => 'Int', default => ((1024 ** 2) * 2));
 
+our $IS_NEW_STYLE = 0;
+sub new_style { $IS_NEW_STYLE }
+
 1;

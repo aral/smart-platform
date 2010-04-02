@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Test::More (defined($ENV{MYSQL_HOST}) && defined($ENV{MYSQL_USER}) && defined($ENV{MYSQL_PASSWORD})) 
-    ? (tests => 42)
+    ? (tests => 46)
     : (skip_all => q{MYSQL_HOST, MYSQL_USER and MYSQL_PASSWORD must be set for this test});
 use Test::Exception;
 
@@ -24,7 +24,12 @@ my $objects = [
           'id'   => 'katrien',
           'name' => 'Katrien',
           'age'  => 32,
-	       }
+	       },
+               {
+          'id'   => 'jim',
+          'name' => 'Jim',
+          'age'  => 0,
+               }
 	      ];
 
 #use Data::Dumper;
@@ -46,9 +51,9 @@ basic: {
 
     ok( $ds->write( $type, $objects->[0] ), "write an object" );
 
-    #use Data::Dumper; diag(Dumper($objects->[0]));
     is_deeply( $ds->read( $type, $objects->[0]->{id} ), $objects->[0], "read an object");
-    #sleep 1;
+    #use Data::Dumper; diag(Dumper($objects->[0]));
+        #sleep 1;
     ok( $ds2->remove( $type, 'hudson' ), "removed an object" );
     #sleep 3; # are we getting a timing problem?
     eval {
@@ -61,6 +66,10 @@ basic: {
     #diag("writing multiple objects");
     foreach my $obj (@$objects) {
       $ds->write( $type, $obj );
+    }
+
+    for my $id (0..(scalar(@$objects)-1)){
+        is_deeply( $ds->read( $type, $objects->[$id]->{id} ), $objects->[$id], "read all objects");
     }
 
     ## simplest query possible, key = value
@@ -100,15 +109,15 @@ basic: {
     {
       ok( my $results = $ds->query( $type, {} ), "blank query");
       isa_ok( $results, 'ARRAY', "results is an array");
-      is( scalar(@$results), 3, "got all three objects back" );
+      is( scalar(@$results), 4, "got all three objects back" );
     }
 
     ## we should get things out in the same order they went in
     {
       ok( my $results = $ds->query( $type, {}, { sort => 'name' } ), "sort by key" );
       isa_ok( $results, 'ARRAY', "results is an array" );
-      is( scalar( @$results ), 3, "got three result back");
-      is_deeply( $results, $objects, "order is correct")
+      is( scalar( @$results ), 4, "got three result back");
+      is_deeply( $results, [sort { $a->{name} cmp $b->{name} } @$objects ], "order is correct")
     }
 
     ## test limiting to a count.  In this case, 2.

@@ -69,11 +69,7 @@ sub _build_root {
     my $hostroot = $self->_master->hostroot;
     my $dir = File::Spec->catfile($hostroot, $self->actual_host);
     if(!-e $dir){
-        try {
-            #make_path($dir);
-        } catch {
-            die "Unable to create hostdirectory '$dir': $@";
-        }
+        die "Host directory '$dir' does not exist";
     }
     return $dir;
 }

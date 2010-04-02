@@ -133,14 +133,11 @@ check_actual_host: {
 
 check_host_root: {
     my $conf = RSP::Config->new(config => $test_config);
-    my $host = $conf->host('foo');
-    is($host->root, "$tmp_dir2/actuallyhere.com", 'root directory returned');
-
-    chmod 0444, $tmp_dir2;
-    $host = $conf->host('bar');
+    my $host = $conf->host('bar');
+    
     throws_ok {
         $host->root
-    } qr{Unable to create hostdirectory '\Q$tmp_dir2/bar\E'},
+    } qr{Host directory '\Q$tmp_dir2/bar\E' does not exist},
         q{Exception thrown when unable to create root};
 
     chmod 0777, $tmp_dir2;
