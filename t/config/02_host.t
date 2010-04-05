@@ -241,7 +241,7 @@ check_file: {
 #---------------------------------------------
 
 new_style_loading: {
-    open(my $fh, ">", "$tmp_dir2/bar/prefs.json") or die "Could not open file: $!";
+    open(my $fh, ">", "$tmp_dir2/bar/bootstrap.js") or die "Could not open file: $!";
     print {$fh} "";
     close($fh);
 
@@ -252,7 +252,7 @@ new_style_loading: {
     is($host->file(web => 'some_code.js'), "$tmp_dir2/bar/some_code.js", q{file for 'web' is correct, new style});
     is($host->bootstrap_file, "$tmp_dir2/bar/bootstrap.js", 'bootstrap file path returned, new style');
 
-    unlink("$tmp_dir2/bar/prefs.json");
+    unlink("$tmp_dir2/bar/bootstrap.js");
 }
 
 new_style_transition: {
@@ -263,7 +263,7 @@ new_style_transition: {
     is($host->file(web => 'some_code.js'), "$tmp_dir2/bar/web/some_code.js", q{file for 'web' is correct});
     is($host->bootstrap_file, "$tmp_dir2/bar/js/bootstrap.js", 'bootstrap file path returned');
     
-    open(my $fh, ">", "$tmp_dir2/bar/prefs.json") or die "Could not open file: $!";
+    open(my $fh, ">", "$tmp_dir2/bar/bootstrap.js") or die "Could not open file: $!";
     print {$fh} "";
     close($fh);
 
@@ -271,4 +271,5 @@ new_style_transition: {
     is($host->file(code => 'some_code.js'), "$tmp_dir2/bar/some_code.js", q{file for 'code' is correct, new style});
     is($host->file(web => 'some_code.js'), "$tmp_dir2/bar/some_code.js", q{file for 'web' is correct, new style});
     is($host->bootstrap_file, "$tmp_dir2/bar/bootstrap.js", 'bootstrap file path returned, new style');
+    unlink("$tmp_dir2/bar/bootstrap.js");
 }

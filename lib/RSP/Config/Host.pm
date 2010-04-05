@@ -76,7 +76,7 @@ sub _build_root {
 
 sub new_style {
     my ($self) = @_;
-    my $path = File::Spec->catfile($self->root, "prefs.json");
+    my $path = File::Spec->catfile($self->root, "bootstrap.js");
     return -e $path ? 1 : 0;
 }
 
