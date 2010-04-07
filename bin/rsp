@@ -38,7 +38,7 @@ $port = $port ? $port : RSP->config->{mojo}->{port};
 my $opts = {
     pid_file => File::Spec->catfile( RSP->config->{_}->{root}, 'run', 'rsp.pid' ),
     app => RSP->new,
-    (defined($port) ? (port => $port) : ()),
+    (defined($port) ? ('listen' => "http://*:$port") : ()),
 }; 
 
 my $server = $prefork 
