@@ -5,8 +5,8 @@ all_from 'lib/RSP.pm';
 license 'MIT';
 perl_version '5.010001';
 
+install_share;
 install_script 'bin/rsp';
-install_script 'bin/rspkeymanagerd';
 
 configure_requires 'Module::Build'; # temporary... Algo::C3 build breaks a huge dependency chain in a non-obvious way
 
@@ -53,6 +53,7 @@ requires 'Net::SSL' => 0;
 requires 'Email::Send' => 0;
 requires 'Email::Simple' => 0;
 requires 'namespace::autoclean' => 0;
+requires 'File::ShareDir' => '1.02';
 
 tests_recursive();
 auto_install;

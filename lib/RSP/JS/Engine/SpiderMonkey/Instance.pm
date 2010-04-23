@@ -7,6 +7,8 @@ use JavaScript::Runtime::OpcodeCounting;
 use Hash::Merge::Simple qw(merge);
 use Try::Tiny;
 use Scalar::Util qw(reftype);
+use File::ShareDir;
+use Cwd;
 
 has runtime => (
     is => 'ro', isa => 'JavaScript::Runtime', lazy_build => 1, 
@@ -145,74 +147,47 @@ EOJS
     };
 }
 
+my $home_dir;
+sub _get_home_dir {
+    my $class = shift;
 
+    $home_dir ||= do {
+        (my $file = "$class.pm") =~ s{::}{/}g;
+        my $home;
+        if ( my $inc_entry = $INC{$file} ) {
+            # find the @INC entry in which $file was found
+            (my $path = $inc_entry) =~ s/$file$//;
+            $path ||= Cwd::cwd() if !defined $path || !length $path;
+            $home = File::Spec->canonpath(File::Spec->rel2abs($path));
+
+            # pop off /lib and /blib if they're there
+            $home = Cwd::realpath(File::Spec->catdir($home,  '..')) while $home =~ /b?lib$/;
+
+            # only return the dir if it has a Makefile.PL or Build.PL or dist.ini
+            if (!-f File::Spec->catdir($home, 'Makefile.PL')) {
+                undef($home);
+            }
+        }
+
+        return $home;
+    };
+
+    return $home_dir;
+}
+
+my $commonjs;
 sub _import_extensions_new_style {
     my $self = shift;
 
-    $self->_import_extensions;
-my $commonjs = <<EOJS;
-var require;
-(function(){
- 
-    var module = {};
-    require = function(module_name, stack){
-        if(!stack) stack = [];
-        var self = arguments.callee;
- 
-        var resolved = resolve(module_name, stack);
-        var [use_string, breakup] = [resolved.identifier, resolved.breakup];
- 
-        if(self.moduleCache[use_string]) return self.moduleCache[use_string].exports;
-        self.moduleCache[use_string] = { id: use_string, exports: {} };
-        
-        if(breakup.length > 1){
-            try {
-                system.filesystem.get(self.path + use_string + ".js");
-            } catch (e) {
-                // If relative file doesn't exist, fall back to absolute
-                var resolved_again = resolve(breakup[breakup.length -1], stack);
-                [use_string, breakup] = [resolved_again.identifier, resolved_again.breakup];
-            }
-        }
- 
-        var new_require = function(new_module_name){
-            return require(new_module_name, stack.concat( breakup.slice(0, -1) ));
-        };
- 
-        var func = load(use_string);
-        func.apply(func, [new_require, module, self.moduleCache[use_string].exports]);
-      
-        return self.moduleCache[use_string].exports;
-    };
-    require.moduleCache = {};
-    require.path = '';
- 
-    var resolve = function(module_name, stack) {
-        var breakup = module_name.split('/');
- 
-        switch(breakup[0]){
-            case '.':
-                breakup.shift(); break;
-            case '..':
-                if(stack.length == 0) throw new Error("Unable to load module '"+module_name+"', already at top level");
-                stack.pop(); breakup.shift(); break;
-            default:
-                stack = []; break;
-        }         
-        
-        var [current_directory, relative_file] = [stack.join('/'), breakup.join('/')];
-        var use_string = current_directory ? (current_directory + '/' + relative_file) : relative_file;
-        return { 'identifier': use_string, 'breakup': breakup };
-    };
- 
-    var load = function(use_string){
-        var load_this = require.path + use_string + '.js';
-        var func = new Function(["require", "module", "exports"], system.filesystem.get(load_this).contents);
-        return func;
-    };
-})();
-EOJS
+    my $class = blessed($self);
+    my $home = _get_home_dir($class);
 
+    my $require_js = (-f File::Spec->catdir($home, 'share/internal_js/require.js')) 
+        ? File::Spec->catdir($home, 'share/internal_js/require.js')
+        : File::ShareDir::dist_file('RSP', 'internal_js/require.js');
+    $commonjs ||= do { local $/; local @ARGV = ($require_js); <>; };
+
+    $self->_import_extensions;
     $self->eval($commonjs);
 }
 
