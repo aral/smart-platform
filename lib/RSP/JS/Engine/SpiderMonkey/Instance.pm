@@ -187,8 +187,16 @@ sub _import_extensions_new_style {
         : File::ShareDir::dist_file('RSP', 'internal_js/require.js');
     $commonjs ||= do { local $/; local @ARGV = ($require_js); <>; };
 
-    $self->_import_extensions;
+    $self->bind_value('extensions', {});
+    foreach my $ext (@{ $self->extensions }) {
+        if($ext->can('does') && $ext->does('RSP::Role::Extension')){
+            my $ext_obj = $ext->new({ js_instance => $self });
+            $ext_obj->bind;
+        }
+    }
+
     $self->eval($commonjs);
+    $self->unbind_value('extensions');
 }
 
 sub _bootstrap {

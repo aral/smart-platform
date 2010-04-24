@@ -1,6 +1,8 @@
 var require;
 (function(){
- 
+
+    var local_extensions = extensions;
+
     var module = {};
     require = function(module_name, stack){
         if(!stack) stack = [];
@@ -11,7 +13,32 @@ var require;
  
         if(self.moduleCache[use_string]) return self.moduleCache[use_string].exports;
         self.moduleCache[use_string] = { id: use_string, exports: {} };
-        
+
+        // NATIVE
+        if( /^smart/.test(use_string) ){
+            // Now we need to examine the contents for local_extensions
+            var deeply = breakup.slice(1);
+            var top_level = local_extensions; 
+            for(var x in local_extensions){
+                if( deeply[0] in local_extensions[ x ]){
+                    top_level = local_extensions[ x ][ deeply[0] ];
+                    deeply.shift();
+                }
+            }
+
+            while(deeply.length){
+                if(deeply[0] in top_level){
+                    top_level = top_level[ deeply[0] ];
+                } else {
+                    throw new Error("Unable to load native smart module: "+module_name);
+                }
+                deeply.shift();
+            }
+
+            self.moduleCache[use_string].exports = top_level;
+            return self.moduleCache[use_string].exports;
+        }
+
         if(breakup.length > 1){
             try {
                 system.filesystem.get(self.path + use_string + ".js");
@@ -54,7 +81,7 @@ var require;
  
     var load = function(use_string){
         var load_this = require.path + use_string + '.js';
-        var func = new Function(["require", "module", "exports"], system.filesystem.get(load_this).contents);
+        var func = new Function(["require", "module", "exports"], require('smart/filesystem').get(load_this).contents);
         return func;
     };
 })();
