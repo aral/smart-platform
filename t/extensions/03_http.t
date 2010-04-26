@@ -49,3 +49,72 @@ http_request: {
     is_deeply($response, { code => 200, content => 'howdy', headers => {} }, q{Response is as expected});
 }
 
+http_get: {
+    my $http = RSP::Extension::HTTP->new({ js_instance => $ji });
+
+    local $LWP::UserAgent::RESPONSE = [200, 'OK', undef, "howdy"];
+    my $response = $http->get('http://foo.bar/', { foo => 'bar', baz => [qw(hehe haha)] });
+
+    is($LWP::UserAgent::REQUEST->uri, 'http://foo.bar/', q{Request URI is correct});
+    is($LWP::UserAgent::REQUEST->method, 'GET', q{Request Method is correct});
+    is($LWP::UserAgent::REQUEST->headers->header('foo'), 'bar', q{Header is correct});
+    is($LWP::UserAgent::REQUEST->headers->header('baz'), 'hehe, haha', q{Header is correct});
+    is_deeply($response, { code => 200, content => 'howdy', headers => {} }, q{Response is as expected});
+}
+
+http_head: {
+    my $http = RSP::Extension::HTTP->new({ js_instance => $ji });
+
+    local $LWP::UserAgent::RESPONSE = [200, 'OK', ['since', 'Then'], ""];
+    my $response = $http->head('http://foo.bar/', { foo => 'bar', baz => [qw(hehe haha)] });
+
+    is($LWP::UserAgent::REQUEST->uri, 'http://foo.bar/', q{Request URI is correct});
+    is($LWP::UserAgent::REQUEST->method, 'HEAD', q{Request Method is correct});
+    is($LWP::UserAgent::REQUEST->headers->header('foo'), 'bar', q{Header is correct});
+    is($LWP::UserAgent::REQUEST->headers->header('baz'), 'hehe, haha', q{Header is correct});
+    is_deeply($response, { code => 200, content => '', headers => { since => 'Then' } }, q{Response is as expected});
+}
+
+http_delete: {
+    my $http = RSP::Extension::HTTP->new({ js_instance => $ji });
+
+    local $LWP::UserAgent::RESPONSE = [200, 'OK', undef, ""];
+    my $response = $http->delete('http://foo.bar/', { foo => 'bar', baz => [qw(hehe haha)] });
+
+    is($LWP::UserAgent::REQUEST->uri, 'http://foo.bar/', q{Request URI is correct});
+    is($LWP::UserAgent::REQUEST->method, 'DELETE', q{Request Method is correct});
+    is($LWP::UserAgent::REQUEST->headers->header('foo'), 'bar', q{Header is correct});
+    is($LWP::UserAgent::REQUEST->headers->header('baz'), 'hehe, haha', q{Header is correct});
+    is_deeply($response, { code => 200, content => '', headers => {} }, q{Response is as expected});
+}
+
+http_post: {
+    my $http = RSP::Extension::HTTP->new({ js_instance => $ji });
+
+    local $LWP::UserAgent::RESPONSE = [200, 'OK', undef, ""];
+    my $response = $http->post('http://foo.bar/', { foo => 'bar', baz => [qw(hehe haha)] }, "howdy");
+
+    is($LWP::UserAgent::REQUEST->uri, 'http://foo.bar/', q{Request URI is correct});
+    is($LWP::UserAgent::REQUEST->method, 'POST', q{Request Method is correct});
+    is($LWP::UserAgent::REQUEST->headers->header('foo'), 'bar', q{Header is correct});
+    is($LWP::UserAgent::REQUEST->headers->header('baz'), 'hehe, haha', q{Header is correct});
+    is($LWP::UserAgent::REQUEST->content, 'howdy', q{Content is correct});
+    is_deeply($response, { code => 200, content => '', headers => {} }, q{Response is as expected});
+}
+
+http_put: {
+    my $http = RSP::Extension::HTTP->new({ js_instance => $ji });
+
+    local $LWP::UserAgent::RESPONSE = [200, 'OK', undef, ""];
+    my $response = $http->put('http://foo.bar/', { foo => 'bar', baz => [qw(hehe haha)] }, "howdy");
+
+    is($LWP::UserAgent::REQUEST->uri, 'http://foo.bar/', q{Request URI is correct});
+    is($LWP::UserAgent::REQUEST->method, 'PUT', q{Request Method is correct});
+    is($LWP::UserAgent::REQUEST->headers->header('foo'), 'bar', q{Header is correct});
+    is($LWP::UserAgent::REQUEST->headers->header('baz'), 'hehe, haha', q{Header is correct});
+    is($LWP::UserAgent::REQUEST->content, 'howdy', q{Content is correct});
+    is_deeply($response, { code => 200, content => '', headers => {} }, q{Response is as expected});
+}
+
+
+
