@@ -57,7 +57,7 @@ has config => (
     },
 );
 
-has version => (is => 'rw', isa => 'Str', trigger => \&_trigger_version, default => "1.8");
+has version => (is => 'rw', isa => 'Str', trigger => \&_trigger_version, default => "1.7");
 sub _trigger_version {
     my ($self, $value, $old_value) = @_;
     $self->set_version($value);
