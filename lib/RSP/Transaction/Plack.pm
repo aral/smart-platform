@@ -157,19 +157,6 @@ sub encode_response {
 #    $self->cleanup_js_environment;
 #}
 
-#sub process_transaction {
-#    my ($self, $env) = @_;
-#    my $resp = Plack::Response->new();
-#
-#    $self->response($resp);
-#    $self->request($env);
-#    $self->bootstrap;
-#    $self->run;
-#    $self->end;
-#
-#    return $self->response;
-#}
-
 ##
 ## return the HTTP request object translated into something that
 ##  JavaScript can process
